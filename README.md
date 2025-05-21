@@ -13,7 +13,8 @@
 ## ERD
 
 - Lv3 구현 전 ERD
-![image](https://github.com/user-attachments/assets/f2420568-8f9f-494c-b1ca-51f173d8a2e7)
+![image](https://github.com/user-attachments/assets/33174468-dcc3-4e0e-9859-12fa434b622e)
+
 
 
 
