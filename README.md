@@ -12,5 +12,5 @@
 
 ## ERD
 
-# Lv3 구현 전 ERD
+- Lv3 구현 전 ERD
 ![image](https://github.com/user-attachments/assets/7d039c40-6e01-435c-ad8a-aa4129ea7036)
