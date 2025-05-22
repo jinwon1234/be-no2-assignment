@@ -12,9 +12,11 @@
 
 ## ERD
 
-- Lv3 구현 전 ERD
+- v1 ERD
 ![image](https://github.com/user-attachments/assets/33174468-dcc3-4e0e-9859-12fa434b622e)
 
+- v2 ERD
+![image](https://github.com/user-attachments/assets/8f829f32-eca8-4da0-a00e-9301a3f80e43)
 
 
 
