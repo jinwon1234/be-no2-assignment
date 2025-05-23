@@ -4,7 +4,9 @@ import kakao.beno2homework.v1.dto.ScheduleDeleteReqDto;
 import kakao.beno2homework.v1.dto.ScheduleRequestDto;
 import kakao.beno2homework.v1.dto.ScheduleResponseDto;
 import kakao.beno2homework.v1.dto.ScheduleUpdateReqDto;
-import kakao.beno2homework.v1.repository.ScheduleRepository;
+import kakao.beno2homework.v1.entity.Schedule;
+import kakao.beno2homework.common.scheduleEx.NotFoundScheduleException;
+import kakao.beno2homework.v1.repository.ScheduleRepositoryV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,9 +17,9 @@ import java.util.List;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class ScheduleService {
+public class ScheduleServiceV1 {
 
-    private final ScheduleRepository scheduleRepository;
+    private final ScheduleRepositoryV1 scheduleRepository;
 
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto scheduleRequestDto) {
         ScheduleResponseDto saved = scheduleRepository.save(scheduleRequestDto);
@@ -30,7 +32,10 @@ public class ScheduleService {
     }
 
     public ScheduleResponseDto getSchedule(Long id) {
-        return scheduleRepository.findScheduleById(id);
+
+        Schedule schedule = scheduleRepository.findById(id).orElseThrow(() -> new NotFoundScheduleException("존재하는 일정이 없습니다."));
+
+        return new ScheduleResponseDto(schedule);
     }
 
     public ScheduleResponseDto updateSchedule(Long id, ScheduleUpdateReqDto scheduleUpdateReqDto) {

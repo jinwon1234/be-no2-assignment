@@ -5,11 +5,10 @@ import kakao.beno2homework.v1.dto.ScheduleRequestDto;
 import kakao.beno2homework.v1.dto.ScheduleResponseDto;
 import kakao.beno2homework.v1.dto.ScheduleUpdateReqDto;
 import kakao.beno2homework.v1.entity.Schedule;
-import kakao.beno2homework.v1.exception.BadRequestScheduleException;
-import kakao.beno2homework.v1.exception.NotFoundScheduleException;
-import kakao.beno2homework.v1.exception.ScheduleRequestFailException;
+import kakao.beno2homework.common.scheduleEx.BadRequestScheduleException;
+import kakao.beno2homework.common.scheduleEx.NotFoundScheduleException;
+import kakao.beno2homework.common.scheduleEx.ScheduleRequestFailException;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -18,8 +17,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,13 +27,14 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class ScheduleRepository {
+public class ScheduleRepositoryV1 {
 
     private final JdbcTemplate jdbcTemplate;
+    private static final String TABLE_NAME = "v1.schedule";
 
     public ScheduleResponseDto save(ScheduleRequestDto dto) {
 
-        String insertSQL = "insert into schedule (author, password, content) VALUES (?, ?, ?)";
+        String insertSQL = "insert into "+ TABLE_NAME +  " (author, password, content) VALUES (?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(con -> {
@@ -47,16 +45,19 @@ public class ScheduleRepository {
             return ps;
         }, keyHolder);
 
+        if (keyHolder.getKey() == null) throw new ScheduleRequestFailException("일정이 저장되지 않았습니다.");
+
         Long generatedId = keyHolder.getKey().longValue();
 
-        Schedule savedSchedule = findScheduleById(generatedId, "일정이 저장되지 않았습니다.");
+        Schedule savedSchedule  = findById(generatedId)
+                .orElseThrow(()-> new NotFoundScheduleException("존재하는 일정이 없습니다."));
 
         return new ScheduleResponseDto(savedSchedule);
     }
 
 
     public List<ScheduleResponseDto> findSchedules(String author, LocalDate updateDate) {
-        StringBuilder sql = new StringBuilder("select * from schedule");
+        StringBuilder sql = new StringBuilder("select * from " + TABLE_NAME);
         List<Object> params = new ArrayList<>();
 
         if (author != null || updateDate != null) {
@@ -85,22 +86,16 @@ public class ScheduleRepository {
                 .toList();
     }
 
-    public ScheduleResponseDto findScheduleById(Long id) {
-
-        Schedule findSchedule = findScheduleById(id, "존재하는 일정이 없습니다.");
-
-        return new ScheduleResponseDto(findSchedule);
-    }
-
     public ScheduleResponseDto updateSchedule(Long id, ScheduleUpdateReqDto dto) {
         List<Object> params = new ArrayList<>();
 
-        Schedule findSchedule = findScheduleById(id, "존재하는 일정이 없습니다.");
+        Schedule findSchedule  = findById(id)
+                .orElseThrow(()-> new NotFoundScheduleException("존재하지 않는 일정입니다."));
 
         if (!findSchedule.getPassword().equals(dto.getPassword()))
             throw new BadRequestScheduleException("비밀번호가 일치하지 않습니다.");
 
-        StringBuilder updateSQL = new StringBuilder("update schedule set ");
+        StringBuilder updateSQL = new StringBuilder("update " + TABLE_NAME + " set ");
 
         if (dto.getAuthor() != null && dto.getContent() != null) {
             updateSQL.append("author = ?, content = ?");
@@ -124,32 +119,34 @@ public class ScheduleRepository {
 
         if (updated  == 0) throw new ScheduleRequestFailException("수정 실패");
 
-        Schedule updatedSchedule = findScheduleById(id, "존재하는 일정이 없습니다.");
+        Schedule updatedSchedule  = findById(id)
+                .orElseThrow(()-> new NotFoundScheduleException("존재하지 않는 일정입니다."));
 
         return new ScheduleResponseDto(updatedSchedule);
     }
 
     public void deleteSchedule(Long id, ScheduleDeleteReqDto dto) {
 
-        Schedule findSchedule  = findScheduleById(id, "존재하는 일정이 없습니다.");
+        Schedule findSchedule  = findById(id)
+                .orElseThrow(()-> new NotFoundScheduleException("존재하지 않는 일정입니다."));
 
         if (!findSchedule.getPassword().equals(dto.getPassword()))
             throw new BadRequestScheduleException("비밀번호가 일치하지 않습니다.");
 
-        String deleteSQL = "delete from schedule where schedule_id = ?";
+        String deleteSQL = "delete from " + TABLE_NAME + " where schedule_id = ?";
 
         int deleted = jdbcTemplate.update(deleteSQL, id);
 
         if (deleted == 0) throw new ScheduleRequestFailException("삭제 실패");
     }
 
-    private Schedule findScheduleById(Long generatedId, String message) {
-        String selectSQL = "select * from schedule where schedule_id = ?";
+    public Optional<Schedule> findById(Long generatedId) {
+        String selectSQL = "select * from " + TABLE_NAME + " where schedule_id = ?";
         try {
             Schedule findSchedule = jdbcTemplate.queryForObject(selectSQL, scheduleRowMapper(), generatedId);
-            return findSchedule;
+            return Optional.of(findSchedule);
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundScheduleException(message);
+            return Optional.empty();
         }
     }
 

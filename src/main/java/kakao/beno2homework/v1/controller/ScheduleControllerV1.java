@@ -4,7 +4,7 @@ import kakao.beno2homework.v1.dto.ScheduleDeleteReqDto;
 import kakao.beno2homework.v1.dto.ScheduleRequestDto;
 import kakao.beno2homework.v1.dto.ScheduleResponseDto;
 import kakao.beno2homework.v1.dto.ScheduleUpdateReqDto;
-import kakao.beno2homework.v1.service.ScheduleService;
+import kakao.beno2homework.v1.service.ScheduleServiceV1;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -17,9 +17,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class ScheduleController {
+public class ScheduleControllerV1 {
 
-    private final ScheduleService scheduleService;
+    private final ScheduleServiceV1 scheduleService;
 
     @PostMapping("/schedules")
     public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto scheduleRequestDto) {

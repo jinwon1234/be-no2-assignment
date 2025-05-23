@@ -1,11 +1,13 @@
-package kakao.beno2homework.v1.dto;
+package kakao.beno2homework.v2.schedule.dto;
 
-import kakao.beno2homework.v1.entity.Schedule;
-import lombok.Data;
+import kakao.beno2homework.v2.entity.Schedule;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@AllArgsConstructor
 public class ScheduleResponseDto {
 
     private Long id;
@@ -14,9 +16,9 @@ public class ScheduleResponseDto {
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 
-    public ScheduleResponseDto(Schedule schedule) {
+    public ScheduleResponseDto(Schedule schedule, String author) {
         this.id = schedule.getId();
-        this.author = schedule.getAuthor();
+        this.author = author;
         this.content = schedule.getContent();
         this.createTime = schedule.getCreateTime();
         this.updateTime = schedule.getUpdateTime();

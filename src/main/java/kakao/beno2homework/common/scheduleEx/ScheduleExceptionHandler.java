@@ -1,4 +1,4 @@
-package kakao.beno2homework.v1.exception;
+package kakao.beno2homework.common.scheduleEx;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
