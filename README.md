@@ -18,7 +18,7 @@
 | 일정 단건 조회   | GET    | /api/v2/schedules/{scheduleId}                  | 요청 param     | 단건 응답 정보     | 200 (OK)            |
 | 전체 일정 조회   | GET    | /api/v2/schedules                           | 요청 param     | 다건 응답 정보     | 200 (OK)            |
 | 일정 삭제        | DELETE | /api/v2/schedules/{scheduleId}                  | 요청 body     | -                | 204 (No Content)    |
-| 일정 수정        | PATCH  | /api/v2/schedules/{scheduleId}                  | 요청 body      | 수정 정보         | 200 (OK)            |
+| 일정 수정        | PUT  | /api/v2/schedules/{scheduleId}                  | 요청 body      | 수정 정보         | 200 (OK)            |
 | 회원가입         | POST   | /api/v2/users                          | 요청 body      | 가입된 회원 정보   | 201 (Created)       |
 | 회원수정        | PATCH   | /api/v2/users                          | 요청 body      | 가입된 회원 정보   | 200 (OK)       |
 | 회원탈퇴         | DELETE   | /api/v2/users                          | 요청 body      | 가입된 회원 정보   | 204 (No Content)       |
