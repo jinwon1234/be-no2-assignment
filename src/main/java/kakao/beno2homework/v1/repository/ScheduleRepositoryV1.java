@@ -59,23 +59,21 @@ public class ScheduleRepositoryV1 {
     public List<ScheduleResponseDto> findSchedules(String author, LocalDate updateDate) {
         StringBuilder sql = new StringBuilder("select * from " + TABLE_NAME);
         List<Object> params = new ArrayList<>();
+        List<String> whereClauses = new ArrayList<>();
 
-        if (author != null || updateDate != null) {
-            sql.append(" where");
 
-            if (author != null) {
-                sql.append(" author = ?");
-                params.add(author);
-            }
+        if (author != null) {
+            whereClauses.add(" author = ?");
+            params.add(author);
+        }
+        if (updateDate != null) {
+            whereClauses.add(" update_time >= ? and update_time < ?");
+            params.add(updateDate.atStartOfDay());
+            params.add(updateDate.plusDays(1).atStartOfDay());
+        }
 
-            if (updateDate != null) {
-                if (!params.isEmpty()) {
-                    sql.append(" AND");
-                }
-                sql.append(" update_time >= ? and update_time < ?");
-                params.add(updateDate.atStartOfDay());
-                params.add(updateDate.plusDays(1).atStartOfDay());
-            }
+        if (!whereClauses.isEmpty()) {
+            sql.append(" where ").append(String.join(" and ", whereClauses));
         }
 
         sql.append(" order by update_time desc");
@@ -87,43 +85,46 @@ public class ScheduleRepositoryV1 {
     }
 
     public ScheduleResponseDto updateSchedule(Long id, ScheduleUpdateReqDto dto) {
-        List<Object> params = new ArrayList<>();
+        Schedule findSchedule = findById(id)
+                .orElseThrow(() -> new NotFoundScheduleException("존재하지 않는 일정입니다."));
 
-        Schedule findSchedule  = findById(id)
-                .orElseThrow(()-> new NotFoundScheduleException("존재하지 않는 일정입니다."));
-
-        if (!findSchedule.getPassword().equals(dto.getPassword()))
+        if (!findSchedule.getPassword().equals(dto.getPassword())) {
             throw new BadRequestScheduleException("비밀번호가 일치하지 않습니다.");
+        }
 
         StringBuilder updateSQL = new StringBuilder("update " + TABLE_NAME + " set ");
+        List<String> setClauses = new ArrayList<>();
+        List<Object> params = new ArrayList<>();
 
-        if (dto.getAuthor() != null && dto.getContent() != null) {
-            updateSQL.append("author = ?, content = ?");
-            params.add(dto.getAuthor());
-            params.add(dto.getContent());
-        }
-        else if (dto.getAuthor() != null) {
-            updateSQL.append("author = ?");
+        if (dto.getAuthor() != null) {
+            setClauses.add("author = ?");
             params.add(dto.getAuthor());
         }
-        else if (dto.getContent() != null) {
-            updateSQL.append("content = ?");
+
+        if (dto.getContent() != null) {
+            setClauses.add("content = ?");
             params.add(dto.getContent());
         }
-        else return new ScheduleResponseDto(findSchedule);
 
+        if (setClauses.isEmpty()) {
+            return new ScheduleResponseDto(findSchedule);
+        }
 
+        updateSQL.append(String.join(", ", setClauses));
         updateSQL.append(" where schedule_id = ?");
         params.add(id);
+
         int updated = jdbcTemplate.update(updateSQL.toString(), params.toArray());
+        if (updated == 0) {
+            throw new ScheduleRequestFailException("수정 실패");
+        }
 
-        if (updated  == 0) throw new ScheduleRequestFailException("수정 실패");
-
-        Schedule updatedSchedule  = findById(id)
-                .orElseThrow(()-> new NotFoundScheduleException("존재하지 않는 일정입니다."));
+        Schedule updatedSchedule = findById(id)
+                .orElseThrow(() -> new NotFoundScheduleException("존재하지 않는 일정입니다."));
 
         return new ScheduleResponseDto(updatedSchedule);
     }
+
 
     public void deleteSchedule(Long id, ScheduleDeleteReqDto dto) {
 

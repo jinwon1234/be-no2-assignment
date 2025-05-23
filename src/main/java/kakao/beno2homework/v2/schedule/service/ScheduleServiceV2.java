@@ -57,15 +57,7 @@ public class ScheduleServiceV2 {
 
     public List<ScheduleResponseDto> findSchedulesWithPage(String author, LocalDate updateDate, Pageable pageable) {
 
-        List<Member> members = memberRepository.findByName(author);
-
-        if (members.isEmpty()) return List.of();
-
-        List<Long> memberIdList = members
-                .stream().map(Member::getId).toList();
-
-
-        return scheduleRepository.findSchedules(memberIdList, updateDate, pageable);
+        return scheduleRepository.findSchedules(author, updateDate, pageable);
     }
 
     public ScheduleResponseDto updateSchedule(Long id, ScheduleUpdateReqDto scheduleUpdateReqDto) {

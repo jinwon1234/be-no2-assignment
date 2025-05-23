@@ -84,18 +84,18 @@ public class ScheduleRepositoryV2 {
         return jdbcTemplate.query(selectSQL, scheduleRowMapper(), memberId);
     }
 
-    public List<ScheduleResponseDto> findSchedules(List<Long> memberIdList, LocalDate updateDate, Pageable pageable) {
+    public List<ScheduleResponseDto> findSchedules(String author, LocalDate updateDate, Pageable pageable) {
         StringBuilder sql = new StringBuilder(
                 "select s.*, m.name as member_name from " + TABLE_NAME + " s " +
                         "join v2.member m on s.member_id = m.member_id"
         );
+
         List<Object> params = new ArrayList<>();
         List<String> whereClauses = new ArrayList<>();
 
-        if (memberIdList != null && !memberIdList.isEmpty()) {
-            String placeholders = memberIdList.stream().map(id -> "?").collect(Collectors.joining(", "));
-            whereClauses.add("s.member_id in (" + placeholders + ")");
-            params.addAll(memberIdList);
+        if (author != null) {
+            whereClauses.add("m.name = ?");
+            params.add(author);
         }
 
         if (updateDate != null) {
