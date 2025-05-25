@@ -36,4 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 
-echo "mysql_data/" >> .gitignore
+mysql_data/
