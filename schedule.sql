@@ -1,9 +1,9 @@
-CREATE database v1;
-CREATE database v2;
+CREATE database IF NOT EXISTS v1;
+CREATE database IF NOT EXISTS v2;
 
 
 USE v1;
-CREATE TABLE schedule (
+CREATE TABLE IF NOT EXISTS schedule (
         schedule_id BIGINT AUTO_INCREMENT PRIMARY KEY,
         author VARCHAR(255) NOT NULL ,
         content VARCHAR(255) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE schedule (
 );
 
 USE v2;
-CREATE TABLE member (
+CREATE TABLE IF NOT EXISTS member (
         member_id BIGINT PRIMARY KEY AUTO_INCREMENT,
         name VARCHAR(255) NOT NULL,
         email VARCHAR(255) UNIQUE NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE member (
         update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE schedule (
+CREATE TABLE IF NOT EXISTS schedule (
         schedule_id BIGINT PRIMARY KEY AUTO_INCREMENT,
         member_id BIGINT NOT NULL,
         content TEXT NOT NULL,
